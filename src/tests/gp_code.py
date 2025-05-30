@@ -1,10 +1,9 @@
 import os
-import active_learning.gaussian_process as gpc
+import src.active_learning.gaussian_process as gpc
 
 home_dir = os.path.expanduser("~")
 path = (home_dir +
-        "/Dropbox/0.Dongjae/04.SUNCAT@SLAC,Standford(2402~)/231128_research/240602_ML_codes/CatNaviGATE/tests/20250228_sheet_for_ML_unique.xlsx")
-# path = "/Users/dongjae/Dropbox/0.Dongjae/04.SUNCAT@SLAC,Standford(2402~)/231128_research/240602_ML_codes/CatNaviGATE/tests/20250228_sheet_for_ML_unique.xlsx"
+        "/Dropbox/0.Dongjae/04.SUNCAT@SLAC,Standford(2402~)/231128_research/240602_ML_codes/CatDegUS/src/tests/20250228_sheet_for_ML_unique.xlsx")
 
 gp1 = gpc.GaussianProcess()
 gp1.preprocess_data_at_once(
