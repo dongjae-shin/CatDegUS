@@ -10,6 +10,7 @@ import src.active_learning.gaussian_process as gpc
 import src.visualization.plot as pl
 
 # Define the path to data
+# Target metric: initial CO2 conversion
 path = './20250228_sheet_for_ML_unique.xlsx'
 
 # Train the Gaussian Process model
