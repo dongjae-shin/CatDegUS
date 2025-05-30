@@ -7,20 +7,28 @@ Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **
 conda create -n catdegus python=3.13
 conda activate catdegus
 ```
-### 2. Install requirements
-   * Required modules: `pandas`, `torch`, `botorch`, `matplotlib`, `openpyxl` (as of May 30, 2025)
-   * For more detailed: See [`requirements.txt`](https://github.com/dongjae-shin/CatDegUS/blob/main/requirements.txt)
+### 2. Clone the repository
 ```
 git clone https://github.com/dongjae-shin/CatDegUS.git
 cd CatDegUS
-pip install -r requirements.txt
 ```
+
+### 2. Install requirements
+* Required modules: `pandas`, `torch`, `botorch`, `matplotlib`, `openpyxl` (as of May 30, 2025)
+  ```
+  pip install pandas torch botorch matplotlib openpyxl
+  ```
+* Alternatively, using [`requirements.txt`](https://github.com/dongjae-shin/CatDegUS/blob/main/requirements.txt) (to be fixed)
+  ```
+  pip install -r requirements.txt
+  ```
+  
 ### 3. Run the example code
-   * Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/) directory.
-```
-python ./src/tests/main.py
-```
-   * Or, you can run the example Jupyter notebook (`*.ipynb`) in the same directory.
+* Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/) directory.
+  ```
+  python ./src/tests/main.py
+  ```
+* Or, you can run the example Jupyter notebook (`*.ipynb`) in the same directory.
 
 ## Supported acquisition functions
 * Posterior Standard Deviation: used for uncertainty sampling (US)
