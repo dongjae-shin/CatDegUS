@@ -3,7 +3,18 @@ Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **
 * Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/) directory.
 * 
 
-## Requirements
+## How to use
+### 1. Make a virtual environment (e.g., when using `conda`):
+```
+conda create -n catdegus python=3.13
+conda activate catdegus
+```
+### 2. Install requirements
+   * Required modules: `pandas`, `torch`, `botorch`, `matplotlib`, `openpyxl` (as of May 30, 2025)
+   * For more detailed: [`requirements.txt`]()
+```
+pip install -r requirements.txt
+```
 
 ## Supported acquisition functions
 * Posterior Standard Deviation: used for uncertainty sampling (US)
