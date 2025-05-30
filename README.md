@@ -10,7 +10,7 @@ conda activate catdegus
 ### 2. Clone the repository
 ```
 git clone https://github.com/dongjae-shin/CatDegUS.git
-cd CatDegUS
+cd CatDegUS/src/tests/
 ```
 
 ### 2. Install requirements
@@ -26,7 +26,7 @@ cd CatDegUS
 ### 3. Run the example code
 * Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/) directory.
   ```
-  python ./src/tests/main.py
+  python ./main.py
   ```
 * Or, you can run the example Jupyter notebook (`*.ipynb`) in the same directory.
 
@@ -46,3 +46,4 @@ cd CatDegUS
   <div align="center">
     <img src="img.png" alt="img">
   </div>
+  
