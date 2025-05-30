@@ -126,6 +126,7 @@ class DiscreteGrid:
             self,
             synth_method: str = 'WI',
             n_candidates: int = 5,
+            verbose: bool = False
     ):
         """
         Suggests n_candidates samples with the highest uncertainty on the discrete grid. Not a batch sampling method.
@@ -133,12 +134,14 @@ class DiscreteGrid:
         Args:
         synth_method (str): The synthesis method to consider, either 'WI' for wet impregnation or 'NP' for colloidal nanoparticle. Default is 'WI'.
         n_candidates (int): The number of candidates to suggest. Default is 5.
+        verbose (bool): If True, prints suggested condition. Default is False.
 
         Returns:
-            None, Prints the top n_candidates uncertain conditions along with their standard deviation.
+            result (pd.DataFrame): A DataFrame containing the top n_candidates conditions along with their posterior standard deviation values.
         """
 
         # TODO: implement batch sampling method such as q-batch, local penalization, and thompson sampling, etc.
+        # TODO: integrate all the acquisition functions in one method
         # Instantiate a acquisition function
         US = PosteriorStandardDeviation(self.GP.gp)
         self.acq_function = US
@@ -157,12 +160,10 @@ class DiscreteGrid:
 
             top_ids = np.argsort(-std)[:n_candidates]  # negativity: sort in reverse order
 
-            # show top 'n_candidates' uncertain conditions
-            print(
-                self.X_discrete_wi.join(
-                    pd.DataFrame(std, columns=[self.acq_label])  # append uncertainty info.
+            # save top 'n_candidates' uncertain conditions
+            result = self.X_discrete_wi.join(
+                pd.DataFrame(std, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
-            )
 
         if synth_method == 'NP':
             # scaling and making tensor
@@ -177,17 +178,20 @@ class DiscreteGrid:
 
             top_ids = np.argsort(-std)[:n_candidates]  # negativity: sort in reverse order
 
-            # show top 'n_candidates' uncertain conditions
-            print(
-                self.X_discrete_np.join(
-                    pd.DataFrame(std, columns=[self.acq_label])  # append uncertainty info.
+            # save top 'n_candidates' uncertain conditions
+            result = self.X_discrete_np.join(
+                pd.DataFrame(std, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
-            )
+
+        if verbose:
+            print(result)
+        return result
 
     def optimize_posterior_mean_discrete(
             self,
             synth_method: str = 'WI',
             n_candidates: int = 5,
+            verbose: bool = False
     ):
         """
         Suggests n_candidates samples with the highest posterior mean on the discrete grid. Not a batch sampling method.
@@ -195,8 +199,9 @@ class DiscreteGrid:
         Args:
             synth_method (str): The synthesis method to consider, either 'WI' for wet impregnation or 'NP' for colloidal nanoparticle. Default is 'WI'.
             n_candidates (int): The number of candidates to suggest. Default is 5.
+            verbose (bool): If True, prints suggested condition. Default is False.
         Returns:
-            None, Prints the top n_candidates conditions along with their posterior mean values.
+            result (pd.DataFrame): A DataFrame containing the top n_candidates conditions along with their posterior mean values.
         """
         PM = PosteriorMean(self.GP.gp)
         self.acq_function = PM
@@ -215,12 +220,10 @@ class DiscreteGrid:
 
             top_ids = np.argsort(-acq)[:n_candidates]  # negativity: sort in reverse order
 
-            # show top 'n_candidates' uncertain conditions
-            print(
-                self.X_discrete_wi.join(
-                    pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
+            # save top 'n_candidates' uncertain conditions
+            result = self.X_discrete_wi.join(
+                pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
-            )
 
         if synth_method == 'NP':
             # scaling and making tensor
@@ -235,17 +238,20 @@ class DiscreteGrid:
 
             top_ids = np.argsort(-acq)[:n_candidates]  # negativity: sort in reverse order
 
-            # show top 'n_candidates' conditions with high posterior mean
-            print(
-                self.X_discrete_np.join(
-                    pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
+            # save top 'n_candidates' conditions with high posterior mean
+            result = self.X_discrete_np.join(
+                pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
-            )
+
+        if verbose:
+            print(result)
+        return result
 
     def optimize_upper_confidence_bound_discrete(
             self,
             synth_method: str = 'WI',
             n_candidates: int = 5,
+            verbose: bool = False
     ):
         """
         Suggests n_candidates samples with the highest upper confidence bound on the discrete grid. Not a batch sampling method.
@@ -253,8 +259,9 @@ class DiscreteGrid:
         Args:
             synth_method (str): The synthesis method to consider, either 'WI' for wet impregnation or 'NP' for colloidal nanoparticle. Default is 'WI'.
             n_candidates (int): The number of candidates to suggest. Default is 5.
+            verbose (bool): If True, prints suggested condition. Default is False.
         Returns:
-            None, Prints the top n_candidates conditions along with their upper confidence bound values.
+            result (pd.DataFrame): A DataFrame containing the top n_candidates conditions along with their upper confidence bound values.
         """
         # instantiate an acquisition function
         UCB = UpperConfidenceBound(self.GP.gp, beta=0.1)
@@ -274,12 +281,10 @@ class DiscreteGrid:
 
             top_ids = np.argsort(-acq)[:n_candidates]  # negativity: sort in reverse order
 
-            # show top 'n_candidates' uncertain conditions
-            print(
-                self.X_discrete_wi.join(
-                    pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
+            # save top 'n_candidates' uncertain conditions
+            result = self.X_discrete_wi.join(
+                pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
-            )
 
         if synth_method == 'NP':
             # scaling and making tensor
@@ -294,12 +299,14 @@ class DiscreteGrid:
 
             top_ids = np.argsort(-acq)[:n_candidates]  # negativity: sort in reverse order
 
-            # show top 'n_candidates' conditions with high upper confidence bound value
-            print(
-                self.X_discrete_np.join(
-                    pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
+            # save top 'n_candidates' conditions with high upper confidence bound value
+            result = self.X_discrete_np.join(
+                pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
-            )
+
+        if verbose:
+            print(result)
+        return result
 
     def optimize_expected_improvement_discrete(
             self,
