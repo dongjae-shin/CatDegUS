@@ -67,6 +67,7 @@ class DiscreteGrid:
         self.X_discrete_np = None
         self.acq_function = None
         self.acq_label = None  # Placeholder for acquisition function label
+        self.maximizer = None  # Placeholder for the maximizer condition
 
     def construct_grid(self, columns: List[str] = None):
         """
@@ -183,8 +184,11 @@ class DiscreteGrid:
                 pd.DataFrame(std, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
 
+        self.maximizer = result.iloc[0, :-1].to_dict()  # Save the maximizer condition
+
         if verbose:
             print(result)
+
         return result
 
     def optimize_posterior_mean_discrete(
@@ -243,8 +247,11 @@ class DiscreteGrid:
                 pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
 
+        self.maximizer = result.iloc[0, :-1].to_dict()  # Save the maximizer condition
+
         if verbose:
             print(result)
+
         return result
 
     def optimize_upper_confidence_bound_discrete(
@@ -304,8 +311,11 @@ class DiscreteGrid:
                 pd.DataFrame(acq, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
 
+        self.maximizer = result.iloc[0, :-1].to_dict()  # Save the maximizer condition
+
         if verbose:
             print(result)
+
         return result
 
     def optimize_expected_improvement_discrete(
