@@ -1,4 +1,5 @@
 import pandas as pd
+from docutils.nodes import target
 
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -13,9 +14,40 @@ from gpytorch.mlls import ExactMarginalLogLikelihood
 # from gpytorch.kernels import RBFKernel, MaternKernel, ScaleKernel
 # from gpytorch.constraints import GreaterThan, Interval
 
+# import scalers
+from .functions import *
+
 class GaussianProcess:
+    """
+    A class to handle Gaussian Process regression for active learning.
+
+    Attributes:
+        df (pd.DataFrame): DataFrame containing the dataset.
+        target (str): Name of the target variable in the dataset.
+        columns (list): List of column names in the DataFrame.
+        df_Xtrain (pd.DataFrame): DataFrame containing training features.
+        df_ytrain (pd.DataFrame): DataFrame containing training labels.
+        x_range_min (list): Minimum values for feature scaling.
+        x_range_max (list): Maximum values for feature scaling.
+        transformer_X (ColumnTransformer): Transformer for feature preprocessing.
+        transformer_y (StandardScaler): Transformer for label preprocessing
+        df_Xtrain_trans (pd.DataFrame): Transformed training features.
+        df_ytrain_trans (pd.DataFrame): Transformed training labels.
+        tensor_Xtrain (torch.Tensor): Tensor of transformed training features.
+        tensor_ytrain (torch.Tensor): Tensor of transformed training labels.
+        gp (SingleTaskGP): Gaussian Process model.
+
+    Methods:
+        preprocess_data_at_once(path, target, x_range_min, x_range_max): Preprocesses the data by reading, constructing transformers, and transforming data.
+        read_data(path, target): Reads the Excel file and returns training features and labels.
+        construct_transformer(x_range_min, x_range_max): Constructs transformers for feature and label preprocessing.
+        transform_data(): Transforms the training data using the constructed transformers.
+        convert_to_tensor(): Converts the transformed DataFrames to PyTorch tensors.
+        train_gp(X, y, covar_module): Trains the Gaussian Process model using the provided or internal data.
+    """
     def __init__(self):
         self.df = None
+        self.target = None
         self.columns = None
         self.df_Xtrain = None
         self.df_ytrain = None
@@ -31,6 +63,7 @@ class GaussianProcess:
 
     def preprocess_data_at_once(self,
                                 path: str,
+                                target: str = None,
                                 x_range_min: list = [300, 0.1, 0.005, 0],
                                 x_range_max: list = [550, 1.0, 0.02, 1]):
         """
@@ -40,18 +73,20 @@ class GaussianProcess:
             path (str): Path to the Excel file.
             x_range_min (list): Minimum values for X scaling.
             x_range_max (list): Maximum values for X scaling.
+            :param target:
         """
-        self.read_data(path)
+        self.read_data(path, target=target)
         self.construct_transformer(x_range_min=x_range_min, x_range_max=x_range_max)
         self.transform_data()
         self.convert_to_tensor()
 
-    def read_data(self, path: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def read_data(self, path: str, target: str = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Read the Excel file and return Xtrain and ytrain DataFrames.
 
         Args:
             path: path to the Excel file made by data.extract.DataForGP
+            target:
         """
         self.df = pd.read_excel(path, header=0)
         self.df = self.df.drop(labels=['filename','experiment_date', 'location', 'GroupID'], axis=1)
@@ -64,15 +99,27 @@ class GaussianProcess:
         )
         print(f'self.df.dtypes: {self.df.dtypes}')
 
-        self.columns = self.df.columns
+        if target is None:
+            # If target is not specified, use the last column as target
+            target = self.df.columns[-1]
+            print(f'No target specified. Using last column: {target}')
+            self.target = target
+        self.columns = self.df.columns.drop(labels=target)
 
-        self.df_Xtrain = self.df.drop(labels=self.columns[-1], axis=1)
-        self.df_ytrain = self.df[[self.columns[-1]]]
+        self.df_Xtrain = self.df.drop(labels=target, axis=1)
+        self.df_ytrain = self.df[[target]]
         return self.df_Xtrain, self.df_ytrain
 
     def construct_transformer(self,
                               x_range_min: list = [300, 0.1, 0.005, 0],
                               x_range_max: list = [550, 1.0, 0.02, 1]):
+        """
+        Constructs transformers for feature and label preprocessing.
+
+        Args:
+            x_range_min: Minimum values for feature scaling.
+            x_range_max: Maximum values for feature scaling.
+        """
 
         # Save x_range_min and x_range_max as attributes
         self.x_range_min = x_range_min
@@ -118,6 +165,9 @@ class GaussianProcess:
         self.transformer_y = transformer_y
 
     def transform_data(self) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Transforms the training data using the constructed transformers.
+        """
         self.transformer_X.fit(self.df_Xtrain)
         self.transformer_y.fit(self.df_ytrain)
         self.df_Xtrain_trans = self.transformer_X.transform(self.df_Xtrain)
@@ -125,11 +175,26 @@ class GaussianProcess:
         return self.df_Xtrain_trans, self.df_ytrain_trans
 
     def convert_to_tensor(self):
+        """
+        Converts the transformed DataFrames to PyTorch tensors.
+        """
         self.tensor_Xtrain = torch.tensor(self.df_Xtrain_trans)
         self.tensor_ytrain = torch.tensor(self.df_ytrain_trans)
 
 
-    def train_gp(self, X: torch.tensor = None, y: torch.tensor = None, covar_module=None):
+    def train_gp(
+            self, X: torch.tensor = None, y: torch.tensor = None, covar_module=None
+    ) -> SingleTaskGP:
+        """
+        Trains the Gaussian Process model using the provided or internal data.
+        Args:
+            X: Training features as a tensor. If None, uses self.tensor_Xtrain.
+            y: Training labels as a tensor. If None, uses self.tensor_ytrain.
+            covar_module: Custom covariance module for the GP model. If None, uses default MaternKernel.
+
+        Returns:
+            SingleTaskGP: The trained Gaussian Process model.
+        """
         # If X and y are not provided, use the transformed data within the class
         if X is None and y is None:
             X = self.tensor_Xtrain
@@ -165,25 +230,3 @@ class GaussianProcess:
         self.gp = model
 
         return self.gp
-
-def scale(data, max, min):
-    # Original(physical) space => Scaled space [0, 1]
-    data_scaled = (data - min) / (max - min)
-    return data_scaled
-
-def descale(data, max, min):
-    # Scaled space [0, 1] => Original(physical) space
-    data_descaled = data * (max - min) + min
-    return data_descaled
-
-def scaler_X(X, x_range_max, x_range_min):
-    scaled = X.copy()
-    for i in range(X.shape[1]): # loop over columns
-      scaled[:,i] = scale(scaled[:,i], x_range_max[i], x_range_min[i])
-    return scaled
-
-def descaler_X(X, x_range_max, x_range_min):
-    descaled = X.copy()
-    for i in range(X.shape[1]): # loop over columns
-      descaled[:,i] = descale(descaled[:,i], x_range_max[i], x_range_min[i])
-    return descaled
