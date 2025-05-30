@@ -10,7 +10,7 @@ conda activate catdegus
 ### 2. Clone the repository
 ```
 git clone https://github.com/dongjae-shin/CatDegUS.git
-cd CatDegUS/src/tests/
+cd CatDegUS/tests/
 ```
 
 ### 3. Install requirements
