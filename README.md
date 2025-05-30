@@ -44,7 +44,11 @@ cd CatDegUS/tests/
 * Maximizer condition for other supported acquisition functions
 * 2D visualization of a selected acquisition function for a selected synthesis method and temperature
   <div align="center">
-    <img src="img.png" alt="img">
+    <img src="2d_plot.png" alt="img">
   </div>
-* 3D visualization of a selected acquisition function for a selected synthesis method (to be added)
+* 3D visualization of a selected acquisition function for a selected synthesis method
+  <div align="center">
+    <img src="3d_plot.png" alt="img">
+  </div>
+
   
