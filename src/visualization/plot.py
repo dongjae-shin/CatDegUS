@@ -109,7 +109,7 @@ class Plotter:
                       ymin: float = 0.0, ymax: float = 0.05
                       ):
 
-        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 5))
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 5))
 
         levels = np.linspace(0, acq_max, n_levels)  # for std
 
