@@ -24,7 +24,7 @@ cd CatDegUS/tests/
   ```
   
 ### 4. Run the example code
-* Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/) directory.
+* Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/) directory.
   ```
   python ./main.py
   ```
@@ -37,7 +37,7 @@ cd CatDegUS/tests/
 * Expected Improvement (EI): to be added.
 
 ## Input to the code
-* A data file (`*.excel`): [example](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/20250228_sheet_for_ML_unique.xlsx)
+* A data file (`*.excel`): [example](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/20250228_sheet_for_ML_unique.xlsx)
 
 ## Output from the code
 * Maximizer condition for posterior standard deviation: US-guided experimental condition
