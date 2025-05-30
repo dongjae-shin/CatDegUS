@@ -42,8 +42,9 @@ cd CatDegUS/src/tests/
 ## 2. Output
 * Maximizer condition for posterior standard deviation: US-guided experimental condition
 * Maximizer condition for other supported acquisition functions
-* 2D visualization of a selected acquisition function
+* 2D visualization of a selected acquisition function for a selected synthesis method and temperature
   <div align="center">
     <img src="img.png" alt="img">
   </div>
+* 3D visualization of a selected acquisition function for a selected synthesis method (to be added)
   
