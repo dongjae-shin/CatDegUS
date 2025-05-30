@@ -13,7 +13,7 @@ git clone https://github.com/dongjae-shin/CatDegUS.git
 cd CatDegUS/src/tests/
 ```
 
-### 2. Install requirements
+### 3. Install requirements
 * Required modules: `pandas`, `torch`, `botorch`, `matplotlib`, `openpyxl` (as of May 30, 2025)
   ```
   pip install pandas torch botorch matplotlib openpyxl
@@ -23,7 +23,7 @@ cd CatDegUS/src/tests/
   pip install -r requirements.txt
   ```
   
-### 3. Run the example code
+### 4. Run the example code
 * Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/) directory.
   ```
   python ./main.py
@@ -36,10 +36,10 @@ cd CatDegUS/src/tests/
 * Upper Confidence Bound (UCB)
 * Expected Improvement (EI): to be added.
 
-## 1. Input
+## Input to the code
 * A data file (`*.excel`): [example](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/20250228_sheet_for_ML_unique.xlsx)
 
-## 2. Output
+## Output from the code
 * Maximizer condition for posterior standard deviation: US-guided experimental condition
 * Maximizer condition for other supported acquisition functions
 * 2D visualization of a selected acquisition function for a selected synthesis method and temperature
