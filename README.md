@@ -24,7 +24,7 @@ cd CatDegUS/tests/
   ```
   
 ### 4. Run the example code
-* Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/) directory.
+* Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/) directory.
   ```
   python ./main.py
   ```
