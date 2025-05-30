@@ -1,7 +1,7 @@
 import os, sys
 
 # Add the project root to sys.path so I can import submodules
-project_root = os.path.abspath(os.path.join(os.getcwd(), "../.."))
+project_root = os.path.abspath(os.path.join(os.getcwd(), ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
@@ -10,11 +10,12 @@ import src.active_learning.gaussian_process as gpc
 import src.visualization.plot as pl
 
 # Define the home directory and path to data
-home_dir = os.path.expanduser("~")
+# home_dir = os.path.expanduser("~")
 
 # Target metric: initial CO2 conversion
-path = (home_dir +
-        "/Dropbox/0.Dongjae/04.SUNCAT@SLAC,Standford(2402~)/231128_research/240602_ML_codes/CatDegUS/src/tests/20250228_sheet_for_ML_unique.xlsx")
+# path = (home_dir +
+#         "/Dropbox/0.Dongjae/04.SUNCAT@SLAC,Standford(2402~)/231128_research/240602_ML_codes/CatDegUS/src/tests/20250228_sheet_for_ML_unique.xlsx")
+path = './20250228_sheet_for_ML_unique.xlsx'
 
 # Train the Gaussian Process model
 GP = gpc.GaussianProcess()
