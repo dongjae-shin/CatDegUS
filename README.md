@@ -1,6 +1,7 @@
 # CatDegUS
 Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **S**ampling
-* example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in `src/tests/` directory.
+* Example python codes (`*.py`,`*.ipynb`) to use CatDegUS are in [`src/tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/) directory.
+* 
 
 ## Requirements
 
@@ -11,7 +12,7 @@ Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **
 * Expected Improvement (EI): to be added.
 
 ## 1. Input
-* A data file (`*.excel`)
+* A data file (`*.excel`): [example](https://github.com/dongjae-shin/CatDegUS/blob/main/src/tests/20250228_sheet_for_ML_unique.xlsx)
 
 ## 2. Output
 * Maximizer condition for posterior standard deviation: US-guided experimental condition
