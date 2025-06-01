@@ -293,7 +293,7 @@ class Plotter:
         # Plot the suggestion
         if self.Grid.maximizer['synth_method'] == self.synth_method_num:
             print(f"Maximizer for synthesis method {self.synth_method_label}: {self.Grid.maximizer}")
-            maximizer = ax.scatter(
+            ax.scatter(
                 self.Grid.maximizer['Rh_weight_loading'],
                 self.Grid.maximizer['Rh_total_mass'],
                 self.Grid.maximizer['reaction_temp'],
@@ -303,8 +303,7 @@ class Plotter:
                 zorder=2.6
             )
         else:
-            maximizer = None
-            print(f"No maximizer found for synthesis method {self.synth_method_label}")
+            print(f"No maximizer has been obtained for synthesis method {self.synth_method_label}")
 
         if plot_allowed_grid:
             plot_grid_3d(self.allowed_meshgrid1, self.allowed_meshgrid2, self.allowed_meshgrid3, ax=ax)
