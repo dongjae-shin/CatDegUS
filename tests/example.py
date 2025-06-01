@@ -1,10 +1,3 @@
-import os, sys
-
-# Add the project root to sys.path so I can import submodules
-project_root = os.path.abspath(os.path.join(os.getcwd(), ".."))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
-
 import catdegus.active_learning.acquisition as aq
 import catdegus.active_learning.gaussian_process as gpc
 import catdegus.visualization.plot as pl
