@@ -6,8 +6,8 @@ import torch
 import matplotlib.pyplot as plt
 import matplotlib
 
-from src.active_learning.acquisition import DiscreteGrid
-from src.active_learning.gaussian_process import GaussianProcess
+from ..active_learning.acquisition import DiscreteGrid
+from ..active_learning.gaussian_process import GaussianProcess
 
 class Plotter:
     def __init__(self,
@@ -57,7 +57,7 @@ class Plotter:
             plot_train (bool): Whether to plot the training data points.
 
         """
-
+        self.synth_method_label = synth_method
         # Convert synth_method to numerical value
         if synth_method == 'WI':
             synth_method = 0

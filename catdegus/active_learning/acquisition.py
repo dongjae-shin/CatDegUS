@@ -7,7 +7,7 @@ from botorch.acquisition.analytic import PosteriorStandardDeviation, UpperConfid
 # from botorch.acquisition import PosteriorStandardDeviation, UpperConfidenceBound
 # from botorch.optim import optimize_acqf, optimize_acqf_mixed
 
-from src.active_learning.gaussian_process import GaussianProcess
+from .gaussian_process import GaussianProcess
 
 class DiscreteGrid:
     """

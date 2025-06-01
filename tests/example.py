@@ -5,9 +5,9 @@ project_root = os.path.abspath(os.path.join(os.getcwd(), ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-import src.active_learning.acquisition as aq
-import src.active_learning.gaussian_process as gpc
-import src.visualization.plot as pl
+import catdegus.active_learning.acquisition as aq
+import catdegus.active_learning.gaussian_process as gpc
+import catdegus.visualization.plot as pl
 
 # Define the path to data
 # Target metric: initial CO2 conversion
