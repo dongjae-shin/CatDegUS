@@ -61,7 +61,7 @@ conda activate catdegus
 ## Output from the code
 * Maximizer condition for posterior standard deviation: US-guided experimental condition
   <div align="center">
-    <img src="./imgs/maximizer.png" alt="img">
+    <img src="./imgs/maximizer.png" alt="img" width="500">
   </div>
 * Maximizer condition for other supported acquisition functions
 * 2D visualization of a selected acquisition function for a selected synthesis method and temperature
