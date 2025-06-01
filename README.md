@@ -3,34 +3,34 @@ Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **
 
 ## Getting started
 ### 1. Make a virtual environment (e.g., when using `conda`):
-```
+``` bash
 conda create -n catdegus python=3.13
 conda activate catdegus
 ```
 ### 2. Installation
 * **Directly install using pip (the simplest way)**
-  ```
+  ``` bash
   pip install git+https://github.com/dongjae-shin/CatDegUS.git
   ```
 * cf. Alternative way: clone repository & install using pip
-  ```
+  ``` bash
   git clone https://github.com/dongjae-shin/CatDegUS.git
   cd CatDegUS
   pip install .
   ```
 * cf. You can also install all the requirements by:
-  ```
+  ``` bash
   pip install -r requirements.txt
   ```
 
 ### 3. Run the example code
 * Example python codes (`example.py`,`example.ipynb`) to use CatDegUS are in [`tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/) directory.
 * In the `tests/`, run as follows:
-  ```
+  ``` bash
   python ./example.py
   ```
 * Alternatively, in a Jupyter notebook (`example.ipynb`):
-  ```
+  ``` python
   import catdegus.active_learning.gaussian_process as gpc
 
   # Define the home directory and path to data
@@ -41,7 +41,8 @@ conda activate catdegus
   GP = gpc.GaussianProcess()
   GP.preprocess_data_at_once(path=path,
                             target='CO2 Conversion (%)_initial value',
-                            x_range_min=[300, 0.1, 0.005, 0], x_range_max=[550, 1.0, 0.02, 1])
+                            x_range_min=[300, 0.1, 0.005, 0], 
+                            x_range_max=[550, 1.0, 0.02, 1])
   GP.train_gp()
   ```
 
