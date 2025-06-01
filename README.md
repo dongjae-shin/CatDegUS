@@ -8,11 +8,11 @@ conda create -n catdegus python=3.13
 conda activate catdegus
 ```
 ### 2. Installation
-* ~~Directly install using pip (the simplest way)~~ (to be available when released)
+* **Directly install using pip (the simplest way)**
   ```
   pip install git+https://github.com/dongjae-shin/CatDegUS.git
   ```
-* **Alternative way: clone repository & install using pip (currently available)**
+* cf. Alternative way: clone repository & install using pip
   ```
   git clone https://github.com/dongjae-shin/CatDegUS.git
   cd CatDegUS
