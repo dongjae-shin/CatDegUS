@@ -73,3 +73,8 @@ conda activate catdegus
   <div align="center">
     <img src="./imgs/3d_plot.png" alt="img" width="500">
   </div>
+
+## To do
+* Extension of available acquisition functions
+* SHAP analysis
+* Selection of the best regression model by LOOCV score
