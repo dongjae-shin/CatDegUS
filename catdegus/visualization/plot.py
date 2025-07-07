@@ -40,7 +40,8 @@ class Plotter:
                                      custom_range: tuple = None,
                                      contour_resolution: int = 50,
                                      plot_allowed_grid: bool = True,
-                                     plot_train: bool = True
+                                     plot_train: bool = True,
+                                     show: bool = True
     ):
         """
         Plots a 2D acquisition function contour plot per temperature
@@ -55,6 +56,7 @@ class Plotter:
             contour_resolution (int): Resolution for the contour grid. Number of points in each dimension for contour plot.
             plot_allowed_grid (bool): Whether to plot the allowed grid points.
             plot_train (bool): Whether to plot the training data points.
+            show (bool): Whether to show the plot immediately. If False, the plot will saved as an image file.
 
         """
         self.synth_method_label = synth_method
@@ -101,14 +103,14 @@ class Plotter:
         self._plot_2d_contour(
             acq_max=acq_max, n_levels=n_levels, temperature_list=temperature_list,
             xmin=start_w_rh, xmax=stop_w_rh, ymin=start_m_rh, ymax=stop_m_rh,
-            plot_allowed_grid=plot_allowed_grid, plot_train=plot_train
+            plot_allowed_grid=plot_allowed_grid, plot_train=plot_train, show=show
         )
 
     def _plot_2d_contour(self,
                       acq_max: float = 1.1, n_levels: int = 32, temperature_list: List[int] = None,
                       xmin: float = 0.0, xmax: float = 6.0,
                       ymin: float = 0.0, ymax: float = 0.05,
-                      plot_allowed_grid: bool = True, plot_train: bool = True
+                      plot_allowed_grid: bool = True, plot_train: bool = True, show: bool = True
                       ):
 
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 5))
@@ -176,7 +178,10 @@ class Plotter:
             plt.legend(
                 # bbox_to_anchor=(1.02, -0.12)
             )
-            plt.show()
+            if show:
+                plt.show()
+            else:
+                plt.savefig(f"./acq_distr_2d_synth_{self.synth_method_label}_{temperature}C.png", bbox_inches='tight', dpi=200)
 
     def plot_3d_acquisition_function(self,
                                      synth_method: str = 'NP',
@@ -185,7 +190,8 @@ class Plotter:
                                      custom_range: tuple = None,
                                      contour_resolution: int = 20,
                                      plot_allowed_grid: bool = True,
-                                     plot_train: bool = True
+                                     plot_train: bool = True,
+                                     show: bool = True
     ):
         """
         Plots a 3D acquisition function contour plot.
@@ -198,6 +204,7 @@ class Plotter:
             contour_resolution (int): Resolution for the contour grid. Number of points in each dimension for contour plot.
             plot_allowed_grid (bool): Whether to plot the allowed grid points.
             plot_train (bool): Whether to plot the training data points.
+            show (bool): Whether to show the plot immediately. If False, the plot will saved as an image file.
         """
         self.synth_method_label = synth_method
         # Convert synth_method to numerical value
@@ -254,7 +261,7 @@ class Plotter:
         self._plot_3d_contour(
             acq_max=acq_max,
             xmin=start_w_rh, xmax=stop_w_rh, ymin=start_m_rh, ymax=stop_m_rh, zmin=start_temp, zmax=stop_temp,
-            plot_allowed_grid=plot_allowed_grid, plot_train=plot_train
+            plot_allowed_grid=plot_allowed_grid, plot_train=plot_train, show=show
         )
 
     def _plot_3d_contour(self,
@@ -262,7 +269,7 @@ class Plotter:
                          xmin: float = 0.0, xmax: float = 6.0,
                          ymin: float = 0.0, ymax: float = 0.05,
                          zmin: float = 300, zmax: float = 550,
-                         plot_allowed_grid: bool = True, plot_train: bool = True
+                         plot_allowed_grid: bool = True, plot_train: bool = True, show: bool = True
                          ):
 
         # Create a 3D scatter plot
@@ -338,8 +345,11 @@ class Plotter:
         ax.set_title(f'Synthesis method: {self.synth_method_label}', fontsize=17)
         ax.set_box_aspect(None, zoom=0.85)  # to prevent z label cut off
         plt.legend(bbox_to_anchor=(1.02, 0.0), ncol=3)
-        # plt.savefig("./acq_distr_3d.png", bbox_inches='tight', dpi=200)
-        plt.show()
+
+        if show:
+            plt.show()
+        else:
+            plt.savefig(f"./acq_distr_3d_synth_{self.synth_method_label}.png", bbox_inches='tight', dpi=200)
 
 
 @np.vectorize
