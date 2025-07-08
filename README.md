@@ -1,5 +1,6 @@
 # CatDegUS
-Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **S**ampling
+Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **S**ampling. Given a preprocessed time-on-stream catalyst testing data (training dataset), and definitions for target metric (output) and experimental variables (input; range and step size), python codes based on `CatDegUS` can suggest the most informative experimental condition with the largest uncertainty. 2D/3D distribution of the GP-based uncertainty can also be visualized.
+
 
 ## Getting started
 ### 1. Make a virtual environment (e.g., when using `conda`):
@@ -57,22 +58,30 @@ conda activate catdegus
 * Expected Improvement (EI): to be added.
 
 ## Input to the code
-* A data file (`*.excel`): [example](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/20250228_sheet_for_ML_unique.xlsx)
+* **Path to a data file** (`*.xlsx`): [example](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/20250228_sheet_for_ML_unique.xlsx)
+* **Target metric** as output of GP surrogate model, e.g., `‘CO2 Conversion(%)_initial value’`; you can choose one of target column names
+* **Lower/Upper boundaries for input features** (reaction temperature, Rh weight loading, Rh total mass, and synthesis method), by which the search space is bounded
+* **Step sizes for input features**, which are allowed by experimental resolution
+* **Number of conditions to suggest**; top $n$ informative conditions will be suggested.
+* **Temperatures to plot** 2D acquisitions functions for
+* **Synthesis method** 1) to suggest the most informative experimental condition for and 2) to plot acquisition functions for
+
 
 ## Output from the code
-* Maximizer condition for posterior standard deviation: US-guided experimental condition
+* **Maximizer condition** for posterior standard deviation: US-guided experimental condition
   <div align="center">
     <img src="./imgs/maximizer.png" alt="img" width="500">
   </div>
 * Maximizer condition for other supported acquisition functions
-* 2D visualization of a selected acquisition function for a selected synthesis method and temperature
+* **2D visualization** of a selected acquisition function for a selected synthesis method and temperature
   <div align="center">
     <img src="./imgs/2d_plot.png" alt="img" width="500">
   </div>
-* 3D visualization of a selected acquisition function for a selected synthesis method
+* **3D visualization** of a selected acquisition function for a selected synthesis method
   <div align="center">
     <img src="./imgs/3d_plot.png" alt="img" width="500">
   </div>
+* **JSON output file** corresponding to 2D/3D plot above is generated upon visualization, which could be used for applications including LLM-agent.
 
 ## To do
 * Extension of available acquisition functions
