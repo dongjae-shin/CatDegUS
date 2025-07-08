@@ -8,6 +8,7 @@ target_metric = 'CO2 Conversion (%)_initial value'
 x_range_min = [300, 0.1, 0.005, 0]                  # Lower boundaries for Temperature, Rh weight loading (wt%), Rh total mass (mg), Synthesis method
 x_range_max = [550, 1.0, 0.02, 1]                   # Upper boundaries for Temperature, Rh weight loading (wt%), Rh total mass (mg), Synthesis method
 x_step = [50, 0.1, 0.0025, 1]                       # Step sizes for each feature
+n_candidates = 5                                    # Code will suggest top n_candidates informative conditions
 temps_to_plot_2d = [300, 350, 400, 450, 500, 550]   # Temperatures to plot in the 2d acquisition function
 synth_method_to_plot = 'NP'                         # Synthesis method to plot the 2d/3d acquisition function for
 # -----------------------------

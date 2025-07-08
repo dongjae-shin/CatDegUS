@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 import matplotlib.pyplot as plt
 import matplotlib
+import json
 
 from ..active_learning.acquisition import DiscreteGrid
 from ..active_learning.gaussian_process import GaussianProcess
@@ -182,6 +183,49 @@ class Plotter:
                 plt.show()
             else:
                 plt.savefig(f"./acq_distr_2d_synth_{self.synth_method_label}_{temperature}C.png", bbox_inches='tight', dpi=200)
+                plt.clf()  # Clear the current figure for the next temperature
+
+            # Output JSON file with raw data for the contour plot for programmatic interaction with an LLM agent
+            contour_data = {
+                'acq_values': {
+                    'x_flattened_meshgrid': self.meshgrid1[0].flatten().tolist(),
+                    'y_flattened_meshgrid': self.meshgrid2[0].flatten().tolist(),
+                    'z_flattened_meshgrid': wrapper_acq_value(
+                        self.meshgrid1, self.meshgrid2, temperature=temperature,
+                        acq_func=self.Grid.acq_function,
+                        synth_method=self.synth_method_num,
+                        GP=self.GP
+                    ).flatten().tolist(),
+                    'xlabel': 'Rh weight loading (wt%)',
+                    'ylabel': 'Rh mass in reactor (mg)',
+                    'zlabel': self.Grid.acq_label,
+                },
+                'global_maximizer_condition': {
+                    'Rh_weight_loading': self.Grid.maximizer['Rh_weight_loading'],
+                    'Rh_total_mass': self.Grid.maximizer['Rh_total_mass'],
+                    'reaction_temp': self.Grid.maximizer['reaction_temp'],
+                    'synth_method': self.Grid.maximizer['synth_method'],
+                },
+                'training_data': {
+                    'Rh_weight_loading': self.GP.df_Xtrain[
+                        (self.GP.df_Xtrain['synth_method'] == self.synth_method_num) &
+                        (self.GP.df_Xtrain['reaction_temp'] == temperature)
+                    ]['Rh_weight_loading'].tolist(),
+                    'Rh_total_mass': self.GP.df_Xtrain[
+                        (self.GP.df_Xtrain['synth_method'] == self.synth_method_num) &
+                        (self.GP.df_Xtrain['reaction_temp'] == temperature)
+                    ]['Rh_total_mass'].tolist(),
+                },
+                'allowed_grid': {
+                    'x_flattened_meshgrid': self.allowed_meshgrid1.flatten().tolist(),
+                    'y_flattened_meshgrid': self.allowed_meshgrid2.flatten().tolist(),
+                },
+                'acquisition_function': self.Grid.acq_label,
+                'synth_method': self.synth_method_label,
+                'temperature': temperature
+            }
+            with open(f"./acq_distr_2d_synth_{self.synth_method_label}_{temperature}C.json", 'w') as f:
+                json.dump(contour_data, f, indent=4)
 
     def plot_3d_acquisition_function(self,
                                      synth_method: str = 'NP',
@@ -350,6 +394,52 @@ class Plotter:
             plt.show()
         else:
             plt.savefig(f"./acq_distr_3d_synth_{self.synth_method_label}.png", bbox_inches='tight', dpi=200)
+            plt.clf()  # Clear the current figure for the next temperature
+
+        # Output JSON file with raw data for the contour plot for programmatic interaction with an LLM agent
+        contour_data = {
+            'acq_values': {
+                'x_flattened_meshgrid': self.meshgrid1[0].flatten().tolist(),
+                'y_flattened_meshgrid': self.meshgrid2[0].flatten().tolist(),
+                'z_flattened_meshgrid': self.meshgrid3[0].flatten().tolist(),
+                'c_flattened_meshgrid': wrapper_acq_value(
+                    self.meshgrid1, self.meshgrid2, self.meshgrid3,
+                    acq_func=self.Grid.acq_function,
+                    synth_method=self.synth_method_num,
+                    GP=self.GP
+                ).flatten().tolist(),
+                'xlabel': 'Rh weight loading (wt%)',
+                'ylabel': 'Rh mass in reactor (mg)',
+                'zlabel': 'Reaction temperature ($^o$C)',
+                'clabel': self.Grid.acq_label,
+            },
+            'global_maximizer_condition': {
+                'Rh_weight_loading': self.Grid.maximizer['Rh_weight_loading'],
+                'Rh_total_mass': self.Grid.maximizer['Rh_total_mass'],
+                'reaction_temp': self.Grid.maximizer['reaction_temp'],
+                'synth_method': self.Grid.maximizer['synth_method'],
+            },
+            'training_data': {
+                'Rh_weight_loading': self.GP.df_Xtrain[
+                    (self.GP.df_Xtrain['synth_method'] == self.synth_method_num)
+                    ]['Rh_weight_loading'].tolist(),
+                'Rh_total_mass': self.GP.df_Xtrain[
+                    (self.GP.df_Xtrain['synth_method'] == self.synth_method_num)
+                    ]['Rh_total_mass'].tolist(),
+                'reaction_temp': self.GP.df_Xtrain[
+                    (self.GP.df_Xtrain['synth_method'] == self.synth_method_num)
+                    ]['reaction_temp'].tolist(),
+            },
+            'allowed_grid': {
+                'x_flattened_meshgrid': self.allowed_meshgrid1.flatten().tolist(),
+                'y_flattened_meshgrid': self.allowed_meshgrid2.flatten().tolist(),
+                'z_flattened_meshgrid': self.allowed_meshgrid3.flatten().tolist(),
+            },
+            'acquisition_function': self.Grid.acq_label,
+            'synth_method': self.synth_method_label,
+        }
+        with open(f"./acq_distr_3d_synth_{self.synth_method_label}.json", 'w') as f:
+            json.dump(contour_data, f, indent=4)
 
 
 @np.vectorize
