@@ -24,7 +24,7 @@ conda activate catdegus
   pip install -r requirements.txt
   ```
 
-### 3. Run the example code (test)
+### 3. Run the example code
 * Example python codes (`example.py`,`example.ipynb`) to use CatDegUS are in [`tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/) directory.
 * In the `tests/`, run as follows:
   ``` bash
