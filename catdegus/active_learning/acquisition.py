@@ -4,6 +4,11 @@ import pandas as pd
 import torch
 import numpy as np
 from botorch.acquisition.analytic import PosteriorStandardDeviation, UpperConfidenceBound, PosteriorMean
+from botorch.acquisition.monte_carlo import qPosteriorStandardDeviation
+from botorch.sampling import SobolQMCNormalSampler
+from botorch.optim import optimize_acqf
+from sklearn.metrics import pairwise_distances_argmin_min
+
 # from botorch.acquisition import PosteriorStandardDeviation, UpperConfidenceBound
 # from botorch.optim import optimize_acqf, optimize_acqf_mixed
 
@@ -68,6 +73,7 @@ class DiscreteGrid:
         self.acq_function = None
         self.acq_label = None  # Placeholder for acquisition function label
         self.maximizer = None  # Placeholder for the maximizer condition
+        self.qmaximizer = None  # Placeholder for the batch maximizer conditions
 
     def construct_grid(self, columns: List[str] = None):
         """
@@ -185,6 +191,107 @@ class DiscreteGrid:
                 ).iloc[top_ids, :]
 
         self.maximizer = result.iloc[0, :-1].to_dict()  # Save the maximizer condition
+
+        if verbose:
+            print(result)
+
+        return result
+
+    def optimize_posterior_std_dev_discrete_batch(
+            self,
+            synth_method: str = 'WI',
+            temperature: float = None,
+            n_candidates: int = 5,
+            verbose: bool = False,
+
+    ):
+        """
+        Suggests n_candidates samples with the highest uncertainty on the discrete grid using batch sampling.
+
+        Args:
+        synth_method (str): The synthesis method to consider, either 'WI' for wet impregnation or 'NP' for colloidal nanoparticle. Default is 'WI'.
+        temperature (float): The reaction temperature to fix during optimization. Required.
+        n_candidates (int): The number of candidates to suggest using q-batch sampling. Default is 5.
+        verbose (bool): If True, prints suggested condition. Default is False.
+
+        Returns:
+            result (pd.DataFrame): A DataFrame containing the top n_candidates conditions.
+        """
+
+        if temperature is None:
+            raise ValueError("Please specify a temperature value to fix during optimization.")
+
+        # Transform the fixed temperature value to the scaled space
+        temperature_trans = self.GP.transformer_X.transform(
+            pd.DataFrame(
+                [[temperature, 0.1, 0.005, 0]], # dummy values for other features
+                columns=self.X_discrete_wi.columns if synth_method == 'WI' else self.X_discrete_np.columns
+            )
+        )[0][0]
+        print(f'Temperature {temperature} C is transformed to {temperature_trans}.')
+
+        # Instantiate a acquisition function
+        sampler = SobolQMCNormalSampler(sample_shape=torch.Size([512,1])) # MC sampling used to approximately calculate acquisition function
+        qPSTD = qPosteriorStandardDeviation(model=self.GP.gp, sampler=sampler)
+        self.acq_function = qPSTD
+        self.acq_label = 'q-Posterior Standard Deviation'
+
+        # Define equality constraints on the input features
+        temperature_constraint = (torch.tensor([0]), torch.tensor([1.0]), temperature_trans)
+        # temperature constraint: 'x0 * 1.0 = temperature_trans'
+
+        if synth_method == 'WI':
+            synth_method_constraint = (torch.tensor([3]), torch.tensor([1.0]), 0)
+            # synth_method constraint: 'x3 * 1.0 = 0' (WI)
+        elif synth_method == 'NP':
+            synth_method_constraint = (torch.tensor([3]), torch.tensor([1.0]), 1)
+            # synth_method constraint: 'x3 * 1.0 = 1' (NP)
+        else:
+            raise ValueError("synth_method must be either 'WI' or 'NP'.")
+
+        equality_constraints = [
+                temperature_constraint,
+                synth_method_constraint
+        ]
+
+        # Optimize the acquisition function
+        batch_candidates, acq_value = optimize_acqf(
+            acq_function=qPSTD,
+            bounds=torch.tensor([[0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0]]),
+            # constraint can also be implicitly applied here.
+            q=n_candidates,
+            num_restarts=5,
+            raw_samples=20,
+            equality_constraints=equality_constraints,
+        )
+
+        print(f"\nBatch candidates shape: {batch_candidates.shape}")
+        print(f"Acquisition values shape: {acq_value.shape}")
+        print(f"Acquisition values: {acq_value}")
+        print(f"\nBatch candidates:\n{batch_candidates}")
+
+        # Choose the closest points from the discrete grid to the optimized candidates
+        closest_points = []
+        idx_list = []
+        if synth_method == 'WI':
+            X_discrete_trans = self.GP.transformer_X.transform(self.X_discrete_wi)
+        elif synth_method == 'NP':
+            X_discrete_trans = self.GP.transformer_X.transform(self.X_discrete_np)
+
+        for batch in batch_candidates:
+            idx = pairwise_distances_argmin_min(batch.unsqueeze(0), X_discrete_trans)[0]
+            closest_points.append(X_discrete_trans[idx][0])
+            idx_list.append(idx)
+        closest_points = torch.tensor(closest_points)
+        idx_list = np.array(idx_list).reshape(-1)
+        print(f"\nBatch candidates (closest grid points):\n{closest_points}")
+
+        if synth_method == 'WI':
+            result = self.X_discrete_wi.iloc[idx_list, :]
+        elif synth_method == 'NP':
+            result = self.X_discrete_np.iloc[idx_list, :] # DataFrame
+
+        self.qmaximizer = result
 
         if verbose:
             print(result)
