@@ -1,4 +1,9 @@
 # CatDegUS
+
+[![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![botorch](https://img.shields.io/badge/botorch-compatible-green.svg)](https://botorch.org/)
+
 Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **S**ampling. Given a preprocessed time-on-stream catalyst testing data (training dataset), and definitions for target metric (output) and experimental variables (input; range and step size), python codes based on `CatDegUS` can suggest the most informative experimental condition with the largest uncertainty. 2D/3D distribution of the GP-based uncertainty can also be visualized.
 
 
