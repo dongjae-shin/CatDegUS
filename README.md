@@ -29,7 +29,7 @@ conda activate catdegus
   pip install -r requirements.txt
   ```
 
-### 3. Run the example code
+### 3. Run example codes
 * Example python codes (`example.py`,`example.ipynb`) to use CatDegUS are in [`tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/) directory.
 * In the `tests/`, run as follows:
   ``` bash
@@ -51,6 +51,8 @@ conda activate catdegus
                             x_range_max=[550, 1.0, 0.02, 1])
   GP.train_gp()
   ```
+* `example.ipynb` (or `example.py`): sequential uncertainty sampling for catalyst testing.
+* `example_HT_reactor`: batch uncertainty sampling for high-throughput (HT) reactor with specific 4×4 reactor architecture.
 
 ## Requirements
 * Required modules: `pandas`, `torch`, `botorch`, `matplotlib`, `openpyxl`
