@@ -8,6 +8,7 @@ Python module for **Cat**alysts' **Deg**radation navigated by **U**ncertainty **
 
 
 ## Getting started
+***
 ### 1. Make a virtual environment (e.g., when using `conda`):
 ``` bash
 conda create -n catdegus python=3.13
@@ -51,20 +52,23 @@ conda activate catdegus
                             x_range_max=[550, 1.0, 0.02, 1])
   GP.train_gp()
   ```
-* `example.ipynb` (or `example.py`): sequential uncertainty sampling for catalyst testing.
-* `example_HT_reactor`: batch uncertainty sampling for high-throughput (HT) reactor with specific 4×4 reactor architecture.
+* `example.ipynb` (or `example.py`): sequential uncertainty sampling for catalyst testing and the visualization of uncertainty.
+* `example_HT_reactor`: batch uncertainty sampling for **high-throughput (HT) reactor** with specific 4×4 reactor architecture.
 
 ## Requirements
+***
 * Required modules: `pandas`, `torch`, `botorch`, `matplotlib`, `openpyxl`
 * All specified in `setup.py`
 
 ## Supported acquisition functions
+***
 * Posterior Standard Deviation: used for uncertainty sampling (US)
 * Posterior Mean
 * Upper Confidence Bound (UCB)
 * Expected Improvement (EI): to be added.
 
 ## Input to the code
+***
 * **Path to a data file** (`*.xlsx`): [example](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/20250228_sheet_for_ML_unique.xlsx)
 * **Target metric** as output of GP surrogate model, e.g., `‘CO2 Conversion(%)_initial value’`; you can choose one of target column names
 * **Lower/Upper boundaries for input features** (reaction temperature, Rh weight loading, Rh total mass, and synthesis method), by which the search space is bounded
@@ -75,11 +79,13 @@ conda activate catdegus
 
 
 ## Output from the code
+***
 * **Maximizer condition** for posterior standard deviation: US-guided experimental condition
   <div align="center">
     <img src="./imgs/maximizer.png" alt="img" width="500">
   </div>
 * Maximizer condition for other supported acquisition functions
+*
 * **2D visualization** of a selected acquisition function for a selected synthesis method and temperature
   <div align="center">
     <img src="./imgs/2d_plot.png" alt="img" width="500">
@@ -91,6 +97,7 @@ conda activate catdegus
 * **JSON output file** corresponding to 2D/3D plot above is generated upon visualization, which could be used for applications including LLM-agent.
 
 ## To do
+***
 * Extension of available acquisition functions
 * SHAP analysis
 * Selection of the best regression model by LOOCV score
