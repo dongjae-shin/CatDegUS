@@ -129,12 +129,77 @@ class DiscreteGrid:
         self.X_discrete_np['Rh_total_mass'] = self.X_discrete_np['Rh_total_mass'].round(4)
         self.X_discrete_np['synth_method'] = self.X_discrete_np['synth_method'].round().astype(int)
 
+    def select_uncertain_temperatures(
+            self,
+            synth_method: str = 'WI',
+            n_temperatures: int = 1,
+    ) -> List[float]:
+        """
+        Selects the top n_temperatures with the highest average uncertainty (posterior standard deviation)
+        across all other features in the discrete grid.
+
+        Args:
+            synth_method (str): The synthesis method to consider, either 'WI' for wet impregnation or 'NP' for colloidal nanoparticle. Default is 'WI'.
+            n_temperatures (int): The number of temperatures to select based on uncertainty. Default is 1.
+
+        Returns:
+            top_temps (List[float]): A list of the top n_temperatures with the highest average uncertainty.
+        """
+
+        if n_temperatures > len(self.list_grids[0]):
+            raise ValueError(f"n_temperatures ({n_temperatures}) cannot be greater than the total unique temperatures ({len(self.list_grids[0])}).")
+
+        # Instantiate a acquisition function
+        PSTD = PosteriorStandardDeviation(self.GP.gp)
+        self.acq_function = PSTD
+        self.acq_label = 'Posterior Standard Deviation'
+
+        avg_std_dict = {}
+
+        # Loop over all unique temperatures in the discrete grid
+        # assuming index 0 is temperature.
+        if synth_method == 'WI':
+            for temperature in self.list_grids[0].tolist():
+                # selecting data at a specific temperature
+                X_discrete_temp = self.X_discrete_wi[self.X_discrete_wi['reaction_temp'] == temperature]
+
+                # scaling and making tensor
+                X_discrete_temp_trans = torch.tensor(self.GP.transformer_X.transform(X_discrete_temp))
+
+                std = PSTD.forward(X_discrete_temp_trans.unsqueeze(1)).detach().numpy()
+                # adding a dummy dimension for batch size
+
+                avg_std_dict[temperature] = float(std.mean())
+
+        if synth_method == 'NP':
+            for temperature in self.list_grids[0].tolist():
+                # selecting data at a specific temperature
+                X_discrete_temp = self.X_discrete_np[self.X_discrete_np['reaction_temp'] == temperature]
+
+                # scaling and making tensor
+                X_discrete_temp_trans = torch.tensor(self.GP.transformer_X.transform(X_discrete_temp))
+
+                std = PSTD.forward(X_discrete_temp_trans.unsqueeze(1)).detach().numpy()
+                # adding a dummy dimension for batch size
+
+                avg_std_dict[temperature] = float(std.mean())
+
+        # print the avg_std_dict
+        print('Average Std. Dev. for each temperature:')
+        for key in avg_std_dict:
+            print(f'Temperature: {key} C, Average Std. Dev.: {avg_std_dict[key]}')
+
+        # select top n_temperatures uncertain temperatures
+        top_temps = sorted(avg_std_dict, key=avg_std_dict.get, reverse=True)[:n_temperatures]
+
+        return top_temps
+
     def optimize_posterior_std_dev_discrete(
             self,
             synth_method: str = 'WI',
             n_candidates: int = 5,
             verbose: bool = False
-    ):
+    ) -> pd.DataFrame:
         """
         Suggests n_candidates samples with the highest uncertainty on the discrete grid. Not a batch sampling method.
 
@@ -150,42 +215,34 @@ class DiscreteGrid:
         # TODO: implement batch sampling method such as q-batch, local penalization, and thompson sampling, etc.
         # TODO: integrate all the acquisition functions in one method
         # Instantiate a acquisition function
-        US = PosteriorStandardDeviation(self.GP.gp)
-        self.acq_function = US
+        PSTD = PosteriorStandardDeviation(self.GP.gp)
+        self.acq_function = PSTD
         self.acq_label = 'Posterior Standard Deviation'
 
         if synth_method == 'WI':
             # scaling and making tensor
-            X_discrete_wi_trans = torch.tensor(
-                self.GP.transformer_X.transform(self.X_discrete_wi)
-            )
+            X_discrete_trans = torch.tensor(self.GP.transformer_X.transform(self.X_discrete_wi))
             # calculate posterior standard deviation for all the possible feature vectors
-            std = US.forward(
-                X_discrete_wi_trans.reshape(
-                    len(X_discrete_wi_trans), 1, X_discrete_wi_trans.shape[1])
-            ).detach().numpy()
+            std = PSTD.forward(X_discrete_trans.unsqueeze(1)).detach().numpy()
 
+            # select top n_candidates uncertain conditions
             top_ids = np.argsort(-std)[:n_candidates]  # negativity: sort in reverse order
 
-            # save top 'n_candidates' uncertain conditions
+            # save top n_candidates uncertain conditions
             result = self.X_discrete_wi.join(
                 pd.DataFrame(std, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
 
         if synth_method == 'NP':
             # scaling and making tensor
-            X_discrete_np_trans = torch.tensor(
-                self.GP.transformer_X.transform(self.X_discrete_np)
-            )
+            X_discrete_trans = torch.tensor(self.GP.transformer_X.transform(self.X_discrete_np))
             # calculate posterior standard deviation for all the possible feature vectors
-            std = US.forward(
-                X_discrete_np_trans.reshape(
-                    len(X_discrete_np_trans), 1, X_discrete_np_trans.shape[1])
-            ).detach().numpy()
+            std = PSTD.forward(X_discrete_trans.unsqueeze(1)).detach().numpy()
 
+            # select top n_candidates uncertain conditions
             top_ids = np.argsort(-std)[:n_candidates]  # negativity: sort in reverse order
 
-            # save top 'n_candidates' uncertain conditions
+            # save top n_candidates uncertain conditions
             result = self.X_discrete_np.join(
                 pd.DataFrame(std, columns=[self.acq_label])  # append uncertainty info.
                 ).iloc[top_ids, :]
@@ -203,8 +260,7 @@ class DiscreteGrid:
             temperature: float = None,
             n_candidates: int = 5,
             verbose: bool = False,
-
-    ):
+    ) -> pd.DataFrame:
         """
         Suggests n_candidates samples with the highest uncertainty on the discrete grid using batch sampling.
 
