@@ -30,8 +30,8 @@ conda activate catdegus
   ```
 
 ### 3. Run example codes
-* Example python codes (`example.py`,`example.ipynb`) to use CatDegUS are in [`tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/) directory.
-* In the `tests/`, run as follows:
+
+* In the [`tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/), run as follows:
   ``` bash
   python ./example.py
   ```
@@ -51,6 +51,8 @@ conda activate catdegus
                             x_range_max=[550, 1.0, 0.02, 1])
   GP.train_gp()
   ```
+### Example codes:
+* Example python codes to use CatDegUS are in [`tests/`](https://github.com/dongjae-shin/CatDegUS/blob/main/tests/) directory.
 * `example.ipynb` (or `example.py`): sequential uncertainty sampling for catalyst testing and the visualization of uncertainty.
 * `example_HT_reactor`: batch uncertainty sampling for **high-throughput (HT) reactor** with specific 4×4 reactor architecture.
 
@@ -95,7 +97,12 @@ conda activate catdegus
 #### `Potential Integration with Other Models`
 * **JSON output file** corresponding to 2D/3D plot above is generated upon visualization, which could be used for applications including LLM-agent.
 
+## Related Publication
+* Integration into a LLM-based multi-agent system ([`link`](https://sc25.conference-program.com/presentation/?id=ws_fgai105&sess=sess209))
+
+
 ## To do
 * Extension of available acquisition functions
 * SHAP analysis
 * Selection of the best regression model by LOOCV score
+* Web application for non-experts
