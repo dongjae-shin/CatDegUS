@@ -182,14 +182,14 @@ class GaussianProcess:
 
 
     def train_gp(
-            self, X: torch.tensor = None, y: torch.tensor = None, covar_module=None
+            self, X: torch.tensor = None, y: torch.tensor = None, hp_dict: dict = None
     ) -> SingleTaskGP:
         """
         Trains the Gaussian Process model using the provided or internal data.
         Args:
             X: Training features as a tensor. If None, uses self.tensor_Xtrain.
             y: Training labels as a tensor. If None, uses self.tensor_ytrain.
-            covar_module: Custom covariance module for the GP model. If None, uses default MaternKernel.
+            hp_dict: A dictionary of hyperparameters for the GP model. If None, uses default settings.
 
         Returns:
             SingleTaskGP: The trained Gaussian Process model.
@@ -199,19 +199,22 @@ class GaussianProcess:
             X = self.tensor_Xtrain
             y = self.tensor_ytrain
 
-        if covar_module is None:
-            # Define the model (default kernel: MaternKernel)
+        if hp_dict is None:
+            # Define the model (default kernel: RBFKernel)
+            # Every hyperparameter is optimized by maximizing the marginal log likelihood (MLL) during training
             model = SingleTaskGP(
                 train_X=X,
                 train_Y=y,
                 outcome_transform=Standardize(m=1)
             )
+
         else:
             model = SingleTaskGP(
                 train_X=X,
                 train_Y=y,
+                train_Yvar=hp_dict.get('train_Yvar', None),
                 outcome_transform=Standardize(m=1),
-                covar_module=covar_module # ScaleKernel(RBFKernel(ard_num_dims=4)) / ScaleKernel(MaternKernel(nu=2.5, ard_num_dims=4))
+                covar_module=hp_dict.get('covar_module', None)
             )
 
         # For the case of mixed input features
@@ -225,6 +228,14 @@ class GaussianProcess:
         mll = ExactMarginalLogLikelihood(model.likelihood, model)
         # Fit the model
         fit_gpytorch_mll(mll)
+
+        if hp_dict is not None and hp_dict['frozen_lengthscale']:
+            # Directly set the lengthscale (fixed, no optimization)
+            model.covar_module.base_kernel.lengthscale = torch.tensor([[1.0]])
+            model.covar_module.base_kernel.raw_lengthscale.requires_grad = False  # freeze it
+
+        print(f"length scale: {model.covar_module.base_kernel.lengthscale}")
+        # print(f"length scale: {model.covar_module.lengthscale}") # for RBFKernel
 
         self.gp = model
 
