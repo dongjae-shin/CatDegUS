@@ -43,7 +43,7 @@ Plot.plot_2d_acquisition_function(
     contour_resolution=50,
     plot_allowed_grid=True,
     plot_train=True,
-    show=False
+    show='save'
 )
 
 Plot.plot_3d_acquisition_function(
