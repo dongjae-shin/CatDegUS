@@ -42,7 +42,7 @@ class Plotter:
                                      contour_resolution: int = 50,
                                      plot_allowed_grid: bool = True,
                                      plot_train: bool = True,
-                                     show: bool = True
+                                     show: str = 'show'
     ):
         """
         Plots a 2D acquisition function contour plot per temperature
@@ -57,7 +57,7 @@ class Plotter:
             contour_resolution (int): Resolution for the contour grid. Number of points in each dimension for contour plot.
             plot_allowed_grid (bool): Whether to plot the allowed grid points.
             plot_train (bool): Whether to plot the training data points.
-            show (bool): Whether to show the plot immediately. If False, the plot will saved as an image file.
+            show (str): Whether to show the plot immediately ('show') or save it as an image file ('save'). Otherwise, the function will return the Axes object for further manipulation.
 
         """
         self.synth_method_label = synth_method
@@ -101,20 +101,20 @@ class Plotter:
         self.meshgrid2 = M_rh_contour
 
         # 3. Contour plot of the acquisition function
-        self._plot_2d_contour(
+        ax = self._plot_2d_contour(
             acq_max=acq_max, n_levels=n_levels, temperature_list=temperature_list,
             xmin=start_w_rh, xmax=stop_w_rh, ymin=start_m_rh, ymax=stop_m_rh,
             plot_allowed_grid=plot_allowed_grid, plot_train=plot_train, show=show
         )
 
+        return ax # only the last Axes object is returned, which corresponds to the last temperature in the list.
+
     def _plot_2d_contour(self,
                       acq_max: float = 1.1, n_levels: int = 32, temperature_list: List[int] = None,
                       xmin: float = 0.0, xmax: float = 6.0,
                       ymin: float = 0.0, ymax: float = 0.05,
-                      plot_allowed_grid: bool = True, plot_train: bool = True, show: bool = True
-                      ):
-
-        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 5))
+                      plot_allowed_grid: bool = True, plot_train: bool = True, show: str = 'show'
+                      )->plt.Axes:
 
         levels = np.linspace(0, acq_max, n_levels)  # for std
 
@@ -123,7 +123,9 @@ class Plotter:
 
         # Contour plot for each temperature
         for temperature in temperature_list:
-            contour = plt.contourf(
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 5))
+
+            contour = ax.contourf(
                 self.meshgrid1,
                 self.meshgrid2,
                 wrapper_acq_value(
@@ -136,16 +138,17 @@ class Plotter:
                 levels=levels
             )
 
-            cbar = plt.colorbar(
+            cbar = fig.colorbar(
                 contour,
                 label=self.Grid.acq_label,
-                ticks=np.linspace(0, acq_max, int(acq_max / 0.1 + 1))
+                ticks=np.linspace(0, acq_max, int(acq_max / 0.1 + 1)),
+                ax=ax
             )
 
             # Plot the maximizer
             if self.Grid.maximizer['synth_method'] == self.synth_method_num and self.Grid.maximizer['reaction_temp'] == temperature:
                 print(f"Maximizer for synthesis method {self.synth_method_label} at temperature {temperature}: {self.Grid.maximizer}")
-                plt.scatter(
+                ax.scatter(
                     self.Grid.maximizer['Rh_weight_loading'],
                     self.Grid.maximizer['Rh_total_mass'],
                     c='white', edgecolor='black', linewidth=1.5,
@@ -156,7 +159,7 @@ class Plotter:
                 print(f"No maximizer found for synthesis method {self.synth_method_label} at temperature {temperature}")
 
             if plot_allowed_grid:
-                plot_grid(self.allowed_meshgrid1, self.allowed_meshgrid2)
+                plot_grid(self.allowed_meshgrid1, self.allowed_meshgrid2, ax=ax)
             if plot_train:
                 plot_train_data(
                     self.GP.df_Xtrain[
@@ -167,23 +170,25 @@ class Plotter:
                         (self.GP.df_Xtrain['Rh_weight_loading'] <= xmax) &
                         (self.GP.df_Xtrain['Rh_total_mass'] >= ymin) &
                         (self.GP.df_Xtrain['Rh_total_mass'] <= ymax)
-                        ]
+                        ],
+                    ax=ax
                     )
 
-            plt.xlim(xmin, xmax)
-            plt.ylim(ymin, ymax)
+            ax.set_xlim(xmin, xmax)
+            ax.set_ylim(ymin, ymax)
             # plt.tight_layout()
-            plt.xlabel('Rh weight loading (wt%)')
-            plt.ylabel('Rh mass in reactor (mg)')
-            plt.title(f'temperature: {temperature} ℃')
-            plt.legend(
+            ax.set_xlabel('Rh weight loading (wt%)')
+            ax.set_ylabel('Rh mass in reactor (mg)')
+            ax.set_title(f'temperature: {temperature} ℃')
+            ax.legend(
                 # bbox_to_anchor=(1.02, -0.12)
             )
-            if show:
+            if show == 'show':
                 plt.show()
-            else:
+            elif show =='save':
                 plt.savefig(f"./acq_distr_2d_synth_{self.synth_method_label}_{temperature}C.png", bbox_inches='tight', dpi=200)
                 plt.clf()  # Clear the current figure for the next temperature
+            # else: return Axes object with plot on it
 
             # Output JSON file with raw data for the contour plot for programmatic interaction with an LLM agent
             contour_data = {
@@ -226,6 +231,8 @@ class Plotter:
             }
             with open(f"./acq_distr_2d_synth_{self.synth_method_label}_{temperature}C.json", 'w') as f:
                 json.dump(contour_data, f, indent=4)
+
+        return ax
 
     def plot_3d_acquisition_function(self,
                                      synth_method: str = 'NP',
@@ -478,14 +485,18 @@ def wrapper_acq_value(
         X_tensor.reshape(len(X_tensor), 1, len(X.columns))  # Reshape to match model input
     ).detach().numpy()
 
-def plot_grid(x_points, y_points):
+def plot_grid(x_points, y_points, ax=None):
     """
     Plots a 2D grid of points.
     :param x_points: expected to be a numpy array made by np.meshgrid
     :param y_points: expected to be a numpy array made by np.meshgrid
+    :param ax: matplotlib axis object
     """
     # X, Y = np.meshgrid(x_points, y_points)
-    plt.scatter(
+    if ax is None:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 5))
+
+    ax.scatter(
         x_points, y_points,
         s=0.3, c='k', label='allowed grid',
     )
@@ -499,19 +510,28 @@ def plot_grid_3d(x_points, y_points, z_points, ax=None):
     :param ax: matplotlib 3D axis object
     """
     # X, Y, Z = np.meshgrid(x_points, y_points, z_points)
+    if ax is None:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 6.5), constrained_layout=True, subplot_kw={'projection': '3d'})
+
     ax.scatter(
         x_points, y_points, z_points,
         s=0.3, c='k', label='allowed grid',
         zorder=2.7, alpha=0.5
     )
 
-def plot_train_data(df_Xtrain):
-    plt.scatter(
+def plot_train_data(df_Xtrain, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6.5, 5))
+
+    ax.scatter(
         df_Xtrain.loc[:, 'Rh_weight_loading'], df_Xtrain.loc[:, 'Rh_total_mass'],
         s=5.0, c='r', marker='D', label='train data'
     )
 
 def plot_train_data_3d(df_Xtrain, ax=None):
+    if ax is None:
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 6.5), constrained_layout=True, subplot_kw={'projection': '3d'})
+
     scatter = ax.scatter(
         df_Xtrain.loc[:, 'Rh_weight_loading'], df_Xtrain.loc[:, 'Rh_total_mass'], df_Xtrain.loc[:, 'reaction_temp'],
         c='red',
