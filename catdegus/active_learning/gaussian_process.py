@@ -229,9 +229,9 @@ class GaussianProcess:
         # Fit the model
         fit_gpytorch_mll(mll)
 
-        if hp_dict is not None and hp_dict['frozen_lengthscale']:
+        if hp_dict is not None and hp_dict['frozen_lengthscale'] is not None:
             # Directly set the lengthscale (fixed, no optimization)
-            model.covar_module.base_kernel.lengthscale = torch.tensor([[1.0]])
+            model.covar_module.base_kernel.lengthscale = hp_dict['frozen_lengthscale']
             model.covar_module.base_kernel.raw_lengthscale.requires_grad = False  # freeze it
 
         print(f"length scale: {model.covar_module.base_kernel.lengthscale}")
