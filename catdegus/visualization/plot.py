@@ -35,6 +35,7 @@ class Plotter:
     def plot_2d_acquisition_function(self,
                                      synth_method: str = 'NP',
                                      acq_max: float = 1.1,
+                                     acq_min: float = 0.0,
                                      n_levels: int = 32,
                                      temperature_list: List[int] = None,
                                      mode: str = 'boundary',
@@ -50,6 +51,7 @@ class Plotter:
         Args:
             synth_method (str): Synthesis method, either 'WI' or 'NP'.
             acq_max (float): Maximum value for the acquisition function in colorbar of plot.
+            acq_min (float): Minimum value for the acquisition function in colorbar of plot.
             n_levels (int): Number of contour levels.
             temperature_list (List[int]): List of temperatures to plot.
             mode (str): Mode for contour plotting, either 'boundary' or 'custom'.
@@ -102,7 +104,7 @@ class Plotter:
 
         # 3. Contour plot of the acquisition function
         ax = self._plot_2d_contour(
-            acq_max=acq_max, n_levels=n_levels, temperature_list=temperature_list,
+            acq_max=acq_max, acq_min=acq_min, n_levels=n_levels, temperature_list=temperature_list,
             xmin=start_w_rh, xmax=stop_w_rh, ymin=start_m_rh, ymax=stop_m_rh,
             plot_allowed_grid=plot_allowed_grid, plot_train=plot_train, show=show
         )
@@ -110,13 +112,13 @@ class Plotter:
         return ax # only the last Axes object is returned, which corresponds to the last temperature in the list.
 
     def _plot_2d_contour(self,
-                      acq_max: float = 1.1, n_levels: int = 32, temperature_list: List[int] = None,
+                      acq_max: float = 1.1, acq_min: float = 0.0, n_levels: int = 32, temperature_list: List[int] = None,
                       xmin: float = 0.0, xmax: float = 6.0,
                       ymin: float = 0.0, ymax: float = 0.05,
                       plot_allowed_grid: bool = True, plot_train: bool = True, show: str = 'show'
                       )->plt.Axes:
 
-        levels = np.linspace(0, acq_max, n_levels)  # for std
+        levels = np.linspace(acq_min, acq_max, n_levels)  # for std
 
         if temperature_list is None:
             temperature_list = self.GP.list_grids[0]
@@ -134,14 +136,14 @@ class Plotter:
                     synth_method=self.synth_method_num,
                     GP=self.GP
                     ),
-                extend='max',
+                extend='both',
                 levels=levels
             )
 
             cbar = fig.colorbar(
                 contour,
                 label=self.Grid.acq_label,
-                ticks=np.linspace(0, acq_max, int(acq_max / 0.1 + 1)),
+                ticks=np.linspace(acq_min, acq_max, int((acq_max - acq_min) / 0.1 + 1)),
                 ax=ax
             )
 
